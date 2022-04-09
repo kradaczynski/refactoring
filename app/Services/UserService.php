@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Http\Requests\UserRequest;
 use App\Repositories\UserRepository;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Exception;
 
 final class UserService
@@ -13,32 +15,33 @@ final class UserService
     public function __construct(private UserRepository $UserRepository)
     {}
 
-    public function save(UserRequest $request): void
+    public function getAll(): Collection
     {
-        $this->UserRepository->save([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        return $this->UserRepository->getAll();
     }
 
-    public function GetById($id)
+    public function save(UserRequest $request): void
+    {
+        $this->UserRepository->save($request->only(['name', 'email', 'password']));
+    }
+
+    public function getById(int $id): Model
     {
         $user = $this->UserRepository->find($id);
 
-        if (null !== $user) {
-            return $user;
-        } else {
-            throw new Exception('User doesnt exist');
-        }
+        return $user ? $user : throw new Exception('User doesnt exist');
     }
 
     public function update(int $id, array $data): void
     {
-        $user = $this->GetById($id);
         $this->UserRepository->update($id, [
             'name' => $data['name'],
             'email' => $data['email'],
         ]);
+    }
+
+    public function delete(int $id): void
+    {
+        $this->UserRepository->destroy($id);
     }
 }

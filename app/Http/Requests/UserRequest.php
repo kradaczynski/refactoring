@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class UserRequest extends FormRequest
@@ -19,8 +20,12 @@ final class UserRequest extends FormRequest
     {
         return [
             'name' => 'required|min:3|max:50',
-            'email' => 'required|email',
-            'password' => 'required|confirmed|min:6',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($this->id)
+            ],
+            'password' => 'sometimes|required|confirmed|min:6',
         ];
     }
 }

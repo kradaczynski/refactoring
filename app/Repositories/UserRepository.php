@@ -6,13 +6,13 @@ use App\Models\User;
 
 final class UserRepository extends AbstractRepository
 {
-    public function __construct(User $user)
+    public function __construct(protected User $user)
     {
         $this->model = $user;
     }
 
-    public function update(int $id, array $updateData): void
+    public function getByEmail(string $email): Collection
     {
-        $this->model->where('id', $id)->update($updateData);
+        return $this->model->where('email', $email)->get();
     }
 }

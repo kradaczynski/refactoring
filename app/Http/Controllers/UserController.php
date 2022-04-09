@@ -6,37 +6,54 @@ use App\Http\Requests\UserRequest;
 use App\Services\UserService;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Illuminate\Http\Request;
 
 final class UserController extends Controller
 {
-    public function create()
+    public function __construct(private UserService $userService)
+    {}
+
+    public function create(): View
     {
-        return view('user.crreate');
+        return view('user.create-edit');
     }
 
-    public function save(UserRequest $request)
+    public function index(): View
     {
-        app()->make(UserService::class)->save($request);
+        $users = $this->userService->getAll();
+        return view('welcome')->with('users', $users);
+    }
+
+    public function store(UserRequest $request): RedirectResponse
+    {
+        $this->userService->save($request);
 
         return redirect('/');
     }
 
-    public function edit($id)
+    public function show(int $id): View
     {
-        $user = app()->make(UserService::class)->GetById($id);
-        return view('user.edit', compact('user'));
+        return $this->edit((int) $id);
     }
 
-    public function update(int $id)
+    public function edit(int $id): View
     {
-        app()->make(UserService::class)->update($id, request()->all());
+        $user = $this->userService->getById($id);
+
+        return view('user.create-edit', compact('user'));
+    }
+
+    public function update(int $id, UserRequest $request): RedirectResponse
+    {
+        $this->userService->update($id, $request->all());
 
         return redirect('/');
     }
 
-    public function delete(int $id): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
-        \DB::table('users')->where('id', $id)->delete();
+        $this->userService->delete($id);
 
         return redirect('/');
     }
